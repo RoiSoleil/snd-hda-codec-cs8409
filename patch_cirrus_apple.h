@@ -427,6 +427,9 @@ struct hda_cvt_setup_apple {
 struct cs8409_apple_spec {
 	struct hda_gen_spec gen;
 
+	/* active per-machine patch ops (dispatched by the driver ops) */
+	const struct hda_codec_ops *codec_ops;
+
 	unsigned int gpio_mask;
 	unsigned int gpio_dir;
 	unsigned int gpio_data;
@@ -1397,8 +1400,7 @@ static int cs_8409_apple_resume(struct hda_codec *codec)
 {
         myprintk("snd_hda_intel: cs_8409_apple_resume\n");
         // code copied from default resume patch ops
-	if (codec->patch_ops.init)
-		codec->patch_ops.init(codec);
+	cs_8409_apple_init(codec);
 	snd_hda_regmap_sync(codec);
         myprintk("snd_hda_intel: end cs_8409_apple_resume\n");
         return 0;
@@ -1720,7 +1722,7 @@ static const struct hda_codec_ops cs_8409_apple_patch_ops = {
 	.build_controls = cs_8409_apple_build_controls,
 	.build_pcms = cs_8409_apple_build_pcms,
 	.init = cs_8409_apple_init,
-	.free = cs_8409_apple_free,
+	CS8409_OPS_REMOVE = cs_8409_apple_free,
 	.unsol_event = cs_8409_cs42l83_jack_unsol_event,
 #ifdef CONFIG_PM
         .resume = cs_8409_apple_resume,
@@ -2591,7 +2593,7 @@ static int patch_cs8409_apple(struct hda_codec *codec)
                //codec->patch_ops = cs_8409_apple_patch_ops_explicit;
                }
         else
-               codec->patch_ops = cs_8409_apple_patch_ops;
+               cs8409_set_patch_ops(codec, &cs_8409_apple_patch_ops);
 
 
 	// not sure about these
@@ -2733,7 +2735,7 @@ static int patch_cs8409_apple(struct hda_codec *codec)
                //codec->patch_ops = cs_8409_apple_patch_ops_explicit;
                }
         else
-               codec->patch_ops = cs_8409_apple_patch_ops;
+               cs8409_set_patch_ops(codec, &cs_8409_apple_patch_ops);
 #endif
 
         // moved to post auto config

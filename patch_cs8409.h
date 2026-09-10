@@ -343,6 +343,9 @@ struct cs8409_spec {
 	struct hda_gen_spec gen;
 	struct hda_codec *codec;
 
+	/* active per-machine patch ops (dispatched by the driver ops) */
+	const struct hda_codec_ops *codec_ops;
+
 	struct sub_codec *scodecs[CS8409_MAX_CODECS];
 	unsigned int num_scodecs;
 
